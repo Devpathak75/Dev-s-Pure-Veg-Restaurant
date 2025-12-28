@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment | Dev’s Pure Veg Restaurant</title>
+    <link rel="stylesheet" href="style.css">
+
+    <script>
+        function loadBill() {
+            let order = JSON.parse(localStorage.getItem("order"));
+            let total = localStorage.getItem("total");
+            let billHTML = "";
+
+            if (order && Object.keys(order).length > 0) {
+                for (let item in order) {
+                    billHTML += item + " × " +
+                        order[item].qty +
+                        " = ₹" + order[item].amount + "<br>";
+                }
+                billHTML += "<hr><b>Total Amount: ₹" + total + "</b>";
+            } else {
+                billHTML = "No items found";
+            }
+
+            document.getElementById("bill").innerHTML = billHTML;
+            localStorage.setItem("lastBill", billHTML);
+
+            populateExpiry();
+        }
+
+        /* ✅ MONTH + YEAR GENERATOR */
+        function populateExpiry() {
+            let monthSelect = document.getElementById("expMonth");
+            let yearSelect = document.getElementById("expYear");
+
+            let months = [
+                "01","02","03","04","05","06",
+                "07","08","09","10","11","12"
+            ];
+
+            months.forEach(m => {
+                let opt = document.createElement("option");
+                opt.value = m;
+                opt.text = m;
+                monthSelect.appendChild(opt);
+            });
+
+            let currentYear = new Date().getFullYear();
+
+            for (let y = currentYear - 10; y <= currentYear + 20; y++) {
+                let opt = document.createElement("option");
+                opt.value = y;
+                opt.text = y;
+                yearSelect.appendChild(opt);
+            }
+        }
+
+        function payNow() {
+            let card = document.getElementById("card").value;
+            let cvv = document.getElementById("cvv").value;
+            let address = document.getElementById("address").value;
+
+            let expMonth = document.getElementById("expMonth").value;
+            let expYear = document.getElementById("expYear").value;
+
+            if (card.length !== 16) {
+                alert("Card number must be 16 digits");
+                return;
+            }
+
+            if (cvv.length !== 3) {
+                alert("CVV must be 3 digits");
+                return;
+            }
+
+            if (address.trim() === "") {
+                alert("Please enter delivery address");
+                return;
+            }
+
+            /* ✅ EXPIRY VALIDATION */
+            let today = new Date();
+            let expDate = new Date(expYear, expMonth - 1);
+
+            if (expDate < new Date(today.getFullYear(), today.getMonth())) {
+                alert("Card expired. Please use a valid card.");
+                return;
+            }
+
+            alert("Payment Successful!\nThank you for your order 😊");
+
+            localStorage.removeItem("order");
+            localStorage.removeItem("total");
+            window.location.href = "index.htm";
+        }
+    </script>
+</head>
+
+<body onload="loadBill()">
+
+<h1 class="page-title">Secure Payment</h1>
+
+<div class="container">
+
+    <div class="cart">
+        <h2>Bill Details</h2>
+        <div id="bill"></div>
+    </div>
+
+    <div class="payment-box">
+
+        <h3>Credit / Debit Card</h3>
+
+        <label>Card Holder Name</label>
+        <input type="text" placeholder="Enter card holder name">
+
+        <label>Card Number</label>
+        <input type="text" id="card" maxlength="16" placeholder="XXXX XXXX XXXX XXXX">
+
+        <div class="row">
+            <div>
+                <label>Expiry Month</label>
+                <select id="expMonth"></select>
+            </div>
+
+            <div>
+                <label>Expiry Year</label>
+                <select id="expYear"></select>
+            </div>
+
+            <div>
+                <label>CVV</label>
+                <input type="password" id="cvv" maxlength="3" placeholder="***">
+            </div>
+        </div>
+
+        <label>Delivery Address</label>
+        <input type="text" id="address" placeholder="Enter full delivery address">
+
+        <button class="pay-btn" onclick="payNow()">Pay Securely</button>
+
+    </div>
+
+</div>
+
+<footer class="footer">
+    <h3>Contact Us</h3>
+    <p>Phone: +91 9209152134</p>
+    <p>Email: devspurevegrestaurant@gmail.com</p>
+    <p>Address: Hatgad, Saputara–Nashik–Surat Highway, Maharashtra</p>
+    <p>© 2025 Dev’s Pure Veg Restaurant</p>
+</footer>
+
+</body>
+</html>
